@@ -1,0 +1,358 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); }
+  .header { padding: 1.5rem 0 1rem; border-bottom: 0.5px solid var(--color-border-tertiary); margin-bottom: 1.5rem; }
+  .header h1 { font-size: 20px; font-weight: 500; color: var(--color-text-primary); }
+  .header p { font-size: 13px; color: var(--color-text-secondary); margin-top: 4px; }
+  .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .filter-btn { font-size: 12px; font-weight: 500; padding: 5px 14px; border-radius: 999px; border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-secondary); cursor: pointer; transition: all 0.15s; }
+  .filter-btn:hover { background: var(--color-background-secondary); color: var(--color-text-primary); }
+  .filter-btn.active { background: var(--color-text-primary); color: var(--color-background-primary); border-color: transparent; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+  .card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden; transition: border-color 0.15s, transform 0.15s; cursor: pointer; }
+  .card:hover { border-color: var(--color-border-primary); transform: translateY(-2px); }
+  .card-thumb { height: 140px; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+  .card-body { padding: 12px 14px 14px; }
+  .card-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
+  .tag { font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 4px; letter-spacing: 0.03em; }
+  .tag-3d { background: #CECBF6; color: #3C3489; }
+  .tag-trans { background: #9FE1CB; color: #085041; }
+  .tag-webgl { background: #F5C4B3; color: #712B13; }
+  .tag-gsap { background: #FAC775; color: #633806; }
+  .tag-scroll { background: #B5D4F4; color: #0C447C; }
+  .tag-particle { background: #F4C0D1; color: #72243E; }
+  .card-title { font-size: 14px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 3px; }
+  .card-desc { font-size: 12px; color: var(--color-text-secondary); line-height: 1.5; }
+  .card-url { font-size: 11px; color: var(--color-text-tertiary); margin-top: 8px; display: flex; align-items: center; gap: 4px; }
+  .award { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.65); color: #fff; font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 4px; }
+  .hidden { display: none; }
+
+  .vis1 { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); }
+  .vis2 { background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460); }
+  .vis3 { background: linear-gradient(135deg, #0d0d0d, #1a0533, #2d0b57); }
+  .vis4 { background: linear-gradient(135deg, #000000, #0a0a0a, #1c1c1c); }
+  .vis5 { background: linear-gradient(135deg, #03001e, #7303c0, #ec38bc); }
+  .vis6 { background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); }
+  .vis7 { background: linear-gradient(135deg, #141e30, #243b55); }
+  .vis8 { background: linear-gradient(135deg, #1f1c18, #3a3320, #786241); }
+  .vis9 { background: linear-gradient(135deg, #2b0a3d, #1a0533, #0d0221); }
+  .vis10 { background: linear-gradient(135deg, #0a0a0a, #1a1a1a, #111); }
+  .vis11 { background: linear-gradient(135deg, #05445E, #189AB4, #75E6DA); }
+  .vis12 { background: linear-gradient(135deg, #0f0c29, #00d2ff, #3a7bd5); }
+
+  .gl-canvas { width: 100%; height: 100%; }
+  .site-icon { font-size: 13px; color: rgba(255,255,255,0.7); font-family: var(--font-mono); text-align: center; padding: 1rem; }
+  .vis-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
+  .vis-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.6); }
+  .vis-line { width: 60px; height: 1px; background: rgba(255,255,255,0.3); }
+  .vis-ring { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.4); display: flex; align-items: center; justify-content: center; }
+  .vis-text { font-size: 11px; color: rgba(255,255,255,0.5); font-family: var(--font-mono); letter-spacing: 0.1em; }
+  .section-label { font-size: 11px; font-weight: 500; color: var(--color-text-secondary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; margin-top: 0.5rem; }
+  .count-badge { font-size: 11px; color: var(--color-text-secondary); margin-left: auto; }
+  .top-bar { display: flex; align-items: center; margin-bottom: 0.75rem; }
+</style>
+
+<div class="header">
+  <h1>Referências · Web 3D & Motion Design</h1>
+  <p>Sites premiados com 3D intro, transições cinematográficas e elementos interativos</p>
+</div>
+
+<div class="filters">
+  <button class="filter-btn active" onclick="filter('all', this)">Todos</button>
+  <button class="filter-btn" onclick="filter('3d', this)">3D / WebGL</button>
+  <button class="filter-btn" onclick="filter('trans', this)">Transições</button>
+  <button class="filter-btn" onclick="filter('gsap', this)">GSAP / Scroll</button>
+  <button class="filter-btn" onclick="filter('particle', this)">Partículas</button>
+</div>
+
+<div class="top-bar">
+  <div class="section-label">Sites de referência</div>
+  <div class="count-badge" id="count">12 sites</div>
+</div>
+
+<div class="grid" id="grid">
+
+  <div class="card" data-tags="3d webgl trans" onclick="openLink('https://www.awwwards.com/sites/hatom')">
+    <div class="card-thumb vis9">
+      <div class="vis-overlay">
+        <div class="vis-ring"><div class="vis-text">3D</div></div>
+        <div class="vis-text" style="margin-top:4px;">cursor distortion</div>
+      </div>
+      <div class="award">SOTD Awwwards</div>
+    </div>
+    <div class="card-body">
+      <div class="card-tags"><span class="tag tag-3d">3D</span><span class="tag tag-webgl">WebGL</span></div>
+      <div class="card-title">Hatom</div>
+      <div class="card-desc">Cursor que distorce o conteúdo em tempo real via WebGL shaders. Intro 3D imersiva com partículas reativas.</div>
+      <div class="card-url">↗ awwwards.com · Site of the Day</div>
+    </div>
+  </div>
+
+  <div class="card" data-tags="3d webgl gsap trans" onclick="openLink('https://ohzi.io')">
+    <div class="card-thumb vis2">
+      <div class="vis-overlay">
+        <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+          <circle cx="30" cy="30" r="28" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+          <circle cx="30" cy="30" r="18" stroke="rgba(255,255,255,0.2)" stroke-width="1" stroke-dasharray="4 3"/>
+          <circle cx="30" cy="30" r="4" fill="rgba(255,255,255,0.6)"/>
+        </svg>
+        <div class="vis-text">particle systems</div>
+      </div>
+      <div class="award">Dev Award Awwwards</div>
+    </div>
+    <div class="card-body">
+      <div class="card-tags"><span class="tag tag-webgl">WebGL</span><span class="tag tag-gsap">GSAP</span></div>
+      <div class="card-title">OHZI Interactive</div>
+      <div class="card-desc">Distorções visuais por cursor, sistema de partículas, shaders GLSL customizados com luminescência. 60fps.</div>
+      <div class="card-url">↗ ohzi.io · Developer Award</div>
+    </div>
+  </div>
+
+  <div class="card" data-tags="3d webgl trans" onclick="openLink('https://stars.chromeexperiments.com')">
+    <div class="card-thumb vis1">
+      <div class="vis-overlay">
+        <svg width="80" height="50" viewBox="0 0 80 50" fill="none">
+          <circle cx="15" cy="25" r="2" fill="rgba(255,255,255,0.7)"/>
+          <circle cx="30" cy="10" r="1.5" fill="rgba(255,255,255,0.5)"/>
+          <circle cx="50" cy="30" r="2.5" fill="rgba(255,255,255,0.9)"/>
+          <circle cx="65" cy="15" r="1" fill="rgba(255,255,255,0.4)"/>
+          <circle cx="40" cy="40" r="1.5" fill="rgba(255,255,255,0.6)"/>
+          <circle cx="22" cy="42" r="1" fill="rgba(255,255,255,0.3)"/>
+          <circle cx="70" cy="38" r="2" fill="rgba(255,255,255,0.5)"/>
+          <line x1="15" y1="25" x2="50" y2="30" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/>
+          <line x1="50" y1="30" x2="65" y2="15" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/>
+        </svg>
+        <div class="vis-text">100,000 stars · WebGL</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-tags"><span class="tag tag-3d">3D</span><span class="tag tag-webgl">WebGL</span></div>
+      <div class="card-title">100,000 Stars</div>
+      <div class="card-desc">Experiência 3D imersiva navegável com Three.js. Transição espacial cinematográfica ao entrar. Referência clássica.</div>
+      <div class="card-url">↗ stars.chromeexperiments.com</div>
+    </div>
+  </div>
+
+  <div class="card" data-tags="trans gsap scroll" onclick="openLink('https://bruno-simon.com')">
+    <div class="card-thumb vis4">
+      <div class="vis-overlay">
+        <svg width="60" height="40" viewBox="0 0 60 40" fill="none">
+          <rect x="10" y="15" width="40" height="20" rx="3" stroke="rgba(255,255,255,0.4)" stroke-width="1" fill="none"/>
+          <rect x="15" y="20" width="8" height="6" rx="1" fill="rgba(255,255,255,0.3)"/>
+          <circle cx="42" cy="23" r="4" stroke="rgba(255,255,255,0.3)" stroke-width="1" fill="none"/>
+          <line x1="10" y1="15" x2="5" y2="5" stroke="rgba(255,255,255,0.2)" stroke-width="0.5"/>
+          <line x1="50" y1="15" x2="55" y2="5" stroke="rgba(255,255,255,0.2)" stroke-width="0.5"/>
+        </svg>
+        <div class="vis-text">3D driving portfolio</div>
+      </div>
+      <div class="award">SOTD Awwwards</div>
+    </div>
+    <div class="card-body">
+      <div class="card-tags"><span class="tag tag-3d">3D</span><span class="tag tag-webgl">WebGL</span></div>
+      <div class="card-title">Bruno Simon Portfolio</div>
+      <div class="card-desc">Portfolio em mundo 3D onde você dirige um carro. Three.js + física real. Icônico e referência máxima de criatividade.</div>
+      <div class="card-url">↗ bruno-simon.com · SOTD</div>
+    </div>
+  </div>
+
+  <div class="card" data-tags="trans gsap scroll" onclick="openLink('https://madewithgsap.com')">
+    <div class="card-thumb vis7">
+      <div class="vis-overlay">
+        <svg width="70" height="40" viewBox="0 0 70 40" fill="none">
+          <line x1="5" y1="30" x2="65" y2="30" stroke="rgba(255,255,255,0.15)" stroke-width="0.5"/>
+          <path d="M5 25 Q20 5 35 20 Q50 35 65 10" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" fill="none"/>
+          <circle cx="35" cy="20" r="3" fill="rgba(255,255,255,0.6)"/>
+          <circle cx="65" cy="10" r="3" fill="rgba(255,255,255,0.4)"/>
+        </svg>
+        <div class="vis-text">50+ scroll effects</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-tags"><span class="tag tag-gsap">GSAP</span><span class="tag tag-trans">Transições</span></div>
+      <div class="card-title">Made With GSAP</div>
+      <div class="card-desc">Biblioteca de 50 efeitos prontos: scroll, mouse, drag, reveals. By vencedores do Awwwards E-Commerce 2023.</div>
+      <div class="card-url">↗ madewithgsap.com</div>
+    </div>
+  </div>
+
+  <div class="card" data-tags="3d webgl scroll" onclick="openLink('https://www.awwwards.com/sites/sea-we-breathe')">
+    <div class="card-thumb vis11">
+      <div class="vis-overlay">
+        <svg width="60" height="50" viewBox="0 0 60 50" fill="none">
+          <path d="M0 30 Q15 20 30 30 Q45 40 60 30" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" fill="none"/>
+          <path d="M0 38 Q15 28 30 38 Q45 48 60 38" stroke="rgba(255,255,255,0.25)" stroke-width="1" fill="none"/>
+          <circle cx="30" cy="20" r="8" stroke="rgba(255,255,255,0.4)" stroke-width="1" fill="rgba(255,255,255,0.05)"/>
+        </svg>
+        <div class="vis-text">underwater WebGL</div>
+      </div>
+      <div class="award">SOTD Awwwards</div>
+    </div>
+    <div class="card-body">
+      <div class="card-tags"><span class="tag tag-3d">3D</span><span class="tag tag-webgl">WebGL</span></div>
+      <div class="card-title">The Sea We Breathe</div>
+      <div class="card-desc">Experiência subaquática imersiva em Three.js. Intro cinematográfica, câmera em movimento com shaders de água.</div>
+      <div class="card-url">↗ awwwards.com · Site of the Day</div>
+    </div>
+  </div>
+
+  <div class="card" data-tags="trans gsap scroll" onclick="openLink('https://tympanus.net/codrops')">
+    <div class="card-thumb vis6">
+      <div class="vis-overlay">
+        <svg width="60" height="40" viewBox="0 0 60 40" fill="none">
+          <rect x="5" y="5" width="22" height="30" rx="2" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.3)" stroke-width="0.8"/>
+          <rect x="33" y="5" width="22" height="30" rx="2" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.2)" stroke-width="0.8"/>
+          <path d="M27 20 L33 20" stroke="rgba(255,255,255,0.5)" stroke-width="1.5" marker-end="url(#a)"/>
+          <line x1="9" y1="14" x2="23" y2="14" stroke="rgba(255,255,255,0.3)" stroke-width="0.8"/>
+          <line x1="9" y1="19" x2="23" y2="19" stroke="rgba(255,255,255,0.2)" stroke-width="0.8"/>
+        </svg>
+        <div class="vis-text">page transitions lab</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-tags"><span class="tag tag-trans">Transições</span><span class="tag tag-gsap">GSAP</span><span class="tag tag-webgl">WebGL</span></div>
+      <div class="card-title">Codrops</div>
+      <div class="card-desc">O maior laboratório de transições de página com WebGL, GSAP, Barba.js. Tutoriais e demos prontos para estudar.</div>
+      <div class="card-url">↗ tympanus.net/codrops</div>
+    </div>
+  </div>
+
+  <div class="card" data-tags="particle 3d webgl" onclick="openLink('https://particle-love.com')">
+    <div class="card-thumb vis5">
+      <div class="vis-overlay">
+        <svg width="70" height="50" viewBox="0 0 70 50" fill="none">
+          <circle cx="35" cy="25" r="2" fill="white" opacity="0.9"/>
+          <circle cx="20" cy="18" r="1.2" fill="white" opacity="0.5"/>
+          <circle cx="50" cy="15" r="1.5" fill="white" opacity="0.6"/>
+          <circle cx="15" cy="35" r="1" fill="white" opacity="0.4"/>
+          <circle cx="55" cy="38" r="1.3" fill="white" opacity="0.5"/>
+          <circle cx="45" cy="30" r="0.8" fill="white" opacity="0.7"/>
+          <circle cx="25" cy="40" r="1.1" fill="white" opacity="0.3"/>
+          <circle cx="60" cy="25" r="0.9" fill="white" opacity="0.4"/>
+          <line x1="35" y1="25" x2="20" y2="18" stroke="rgba(255,255,255,0.2)" stroke-width="0.5"/>
+          <line x1="35" y1="25" x2="50" y2="15" stroke="rgba(255,255,255,0.15)" stroke-width="0.5"/>
+          <line x1="35" y1="25" x2="45" y2="30" stroke="rgba(255,255,255,0.25)" stroke-width="0.5"/>
+        </svg>
+        <div class="vis-text">GPU particles</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-tags"><span class="tag tag-particle">Partículas</span><span class="tag tag-webgl">WebGL</span></div>
+      <div class="card-title">Particle Love</div>
+      <div class="card-desc">Sistema de partículas GPU em WebGL puro. Formação de formas 3D interativas. Referência de performance e beleza.</div>
+      <div class="card-url">↗ particle-love.com</div>
+    </div>
+  </div>
+
+  <div class="card" data-tags="trans gsap scroll" onclick="openLink('https://www.awwwards.com/websites/gsap/')">
+    <div class="card-thumb vis8">
+      <div class="vis-overlay">
+        <svg width="70" height="45" viewBox="0 0 70 45" fill="none">
+          <rect x="5" y="5" width="60" height="35" rx="2" stroke="rgba(255,255,255,0.2)" stroke-width="0.8" fill="none"/>
+          <line x1="5" y1="15" x2="65" y2="15" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/>
+          <rect x="10" y="20" width="15" height="15" rx="1" fill="rgba(255,255,255,0.15)"/>
+          <rect x="30" y="20" width="15" height="10" rx="1" fill="rgba(255,255,255,0.1)"/>
+          <rect x="50" y="20" width="10" height="12" rx="1" fill="rgba(255,255,255,0.1)"/>
+        </svg>
+        <div class="vis-text">award winners gallery</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-tags"><span class="tag tag-gsap">GSAP</span><span class="tag tag-trans">Transições</span><span class="tag tag-scroll">Scroll</span></div>
+      <div class="card-title">Awwwards · GSAP Gallery</div>
+      <div class="card-desc">Galeria oficial de todos os sites premiados usando GSAP. Maior acervo de animações de scroll e transições do mundo.</div>
+      <div class="card-url">↗ awwwards.com/websites/gsap</div>
+    </div>
+  </div>
+
+  <div class="card" data-tags="3d webgl trans" onclick="openLink('https://www.awwwards.com/websites/three-js/')">
+    <div class="card-thumb vis3">
+      <div class="vis-overlay">
+        <svg width="50" height="50" viewBox="0 0 50 50" fill="none">
+          <polygon points="25,5 47,42 3,42" stroke="rgba(255,255,255,0.5)" stroke-width="1" fill="rgba(255,255,255,0.05)"/>
+          <polygon points="25,15 38,38 12,38" stroke="rgba(255,255,255,0.3)" stroke-width="0.8" fill="rgba(255,255,255,0.05)"/>
+          <circle cx="25" cy="5" r="2" fill="rgba(255,255,255,0.6)"/>
+        </svg>
+        <div class="vis-text">Three.js collection</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-tags"><span class="tag tag-3d">3D</span><span class="tag tag-webgl">WebGL</span></div>
+      <div class="card-title">Awwwards · Three.js Gallery</div>
+      <div class="card-desc">Coleção completa de sites premiados com Three.js — intros 3D, ambientes imersivos, produtos 3D interativos.</div>
+      <div class="card-url">↗ awwwards.com/websites/three-js</div>
+    </div>
+  </div>
+
+  <div class="card" data-tags="scroll trans gsap" onclick="openLink('https://locomotive.ca')">
+    <div class="card-thumb vis12">
+      <div class="vis-overlay">
+        <svg width="60" height="40" viewBox="0 0 60 40" fill="none">
+          <line x1="30" y1="5" x2="30" y2="35" stroke="rgba(255,255,255,0.3)" stroke-width="0.8" stroke-dasharray="2 2"/>
+          <rect x="10" y="10" width="40" height="20" rx="2" stroke="rgba(255,255,255,0.4)" stroke-width="0.8" fill="rgba(255,255,255,0.05)"/>
+          <line x1="10" y1="20" x2="50" y2="20" stroke="rgba(255,255,255,0.15)" stroke-width="0.5"/>
+        </svg>
+        <div class="vis-text">smooth scroll agency</div>
+      </div>
+      <div class="award">Studio of the Year</div>
+    </div>
+    <div class="card-body">
+      <div class="card-tags"><span class="tag tag-scroll">Scroll</span><span class="tag tag-trans">Transições</span><span class="tag tag-gsap">GSAP</span></div>
+      <div class="card-title">Locomotive Studio</div>
+      <div class="card-desc">Agência criadora do Locomotive Scroll. Site exemplo com transições fluídas, parallax e smooth scroll premium.</div>
+      <div class="card-url">↗ locomotive.ca · Studio of the Year</div>
+    </div>
+  </div>
+
+  <div class="card" data-tags="particle 3d scroll trans" onclick="openLink('https://dala.framer.website')">
+    <div class="card-thumb vis10">
+      <div class="vis-overlay">
+        <svg width="70" height="50" viewBox="0 0 70 50" fill="none">
+          <circle cx="35" cy="25" r="18" stroke="rgba(255,255,255,0.15)" stroke-width="0.8" fill="none"/>
+          <circle cx="35" cy="25" r="10" stroke="rgba(255,255,255,0.25)" stroke-width="0.8" fill="none"/>
+          <circle cx="35" cy="25" r="3" fill="rgba(255,255,255,0.5)"/>
+          <line x1="35" y1="7" x2="35" y2="1" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+          <line x1="53" y1="25" x2="59" y2="25" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+          <line x1="35" y1="43" x2="35" y2="49" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+          <line x1="17" y1="25" x2="11" y2="25" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>
+        </svg>
+        <div class="vis-text">cinematic intro</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="card-tags"><span class="tag tag-3d">3D</span><span class="tag tag-trans">Transições</span><span class="tag tag-particle">Partículas</span></div>
+      <div class="card-title">Framer Community · 3D Intros</div>
+      <div class="card-desc">Coletânea de sites Framer com intros 3D cinematográficas. Bom para estudar composições e timing de entrada.</div>
+      <div class="card-url">↗ framer.com/community</div>
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 0.5px solid var(--color-border-tertiary); display: flex; gap: 12px; flex-wrap: wrap;">
+  <button onclick="sendPrompt('Agora cria para mim um site com intro 3D usando Three.js e transições cinematográficas, com referência nesses sites')" style="font-size: 13px; padding: 8px 16px; border-radius: 999px; border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-primary); cursor: pointer;">Criar site com intro 3D ↗</button>
+  <button onclick="sendPrompt('Me mostre mais referências de transições de página tipo Barba.js e ViewTransitions API')" style="font-size: 13px; padding: 8px 16px; border-radius: 999px; border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-secondary); cursor: pointer;">Mais referências de page transitions ↗</button>
+  <button onclick="sendPrompt('Quais as stacks técnicas usadas nesses sites premiados? Three.js, GSAP, Lenis, Barba.js?')" style="font-size: 13px; padding: 8px 16px; border-radius: 999px; border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-secondary); cursor: pointer;">Ver stacks técnicas ↗</button>
+</div>
+
+<script>
+function filter(cat, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const cards = document.querySelectorAll('.card');
+  let visible = 0;
+  cards.forEach(card => {
+    const tags = card.dataset.tags || '';
+    if (cat === 'all' || tags.includes(cat)) {
+      card.classList.remove('hidden');
+      visible++;
+    } else {
+      card.classList.add('hidden');
+    }
+  });
+  document.getElementById('count').textContent = visible + ' site' + (visible !== 1 ? 's' : '');
+}
+function openLink(url) {
+  window.open(url, '_blank');
+}
+</script>
